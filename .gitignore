@@ -1,0 +1,30 @@
+# IntelliJ
+.idea
+originalFiles
+*.iml
+*.zip
+*.bin
+
+
+# Development Environment
+.dev_env
+
+# Checkstyle
+*.checkstyle
+
+# Target
+target
+
+# Eclipse
+.project
+.classpath
+*.prefs
+**/.settings
+**/.factorypath
+.factorypath
+
+# Jenkins
+.repository
+
+#Sonar
+.scannerwork
