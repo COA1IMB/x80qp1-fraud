@@ -20,6 +20,7 @@ public class Utilities {
     static String getPropertieValue(String key) {
 
         Properties prop = new Properties();
+        File x = new File("src\\main\\runConfiguration.properties");
 
         try (InputStream input = new FileInputStream("src\\main\\resources\\runConfiguration.properties")) {
             prop.load(input);
@@ -35,12 +36,6 @@ public class Utilities {
         int numberOfColumns = data.get(0).size();
         double[] values = new double[numberOfDataSets];
         double[] mins = new double[numberOfColumns];
-
-        for(int x = 0;x<data.size();x++){
-            if(data.get(x).size() != 39){
-                System.out.println(" Error " + x);
-            }
-        }
 
         for (int j = 0; j < data.get(0).size(); j++) {
             for (int i = 0; i < numberOfDataSets; i++) {

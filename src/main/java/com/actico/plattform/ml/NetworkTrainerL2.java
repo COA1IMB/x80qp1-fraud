@@ -44,7 +44,7 @@ public class NetworkTrainerL2 {
 
     void trainNetwork(List<List<String>> data, List<List<String>> data2, String neuralNetworkFilePath) {
 
-        int batchSize = Integer.parseInt(Utilities.getPropertieValue("batchSize"));
+        int batchSize = 1026;
         DataSetIterator trainIter = null;
         DataSetIterator regIter = null;
 
@@ -52,8 +52,8 @@ public class NetworkTrainerL2 {
              RecordReader rr2 = new ListStringRecordReader()) {
             rr.initialize(new ListStringSplit(data));
             rr2.initialize(new ListStringSplit(data2));
-            trainIter = new RecordReaderDataSetIterator(rr, batchSize, 38, 2);
-            regIter = new RecordReaderDataSetIterator(rr2, 1, 38, 2);
+            trainIter = new RecordReaderDataSetIterator(rr, batchSize, 29, 2);
+            regIter = new RecordReaderDataSetIterator(rr2, 1, 29, 2);
         } catch (Exception e) {
             log.warn(e);
         }
@@ -122,7 +122,7 @@ public class NetworkTrainerL2 {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .regularization(false)
                 .list()
-                .layer(0, new DenseLayer.Builder().nIn(38).nOut(1000).updater(ADAGRAD)
+                .layer(0, new DenseLayer.Builder().nIn(29).nOut(1000).updater(ADAGRAD)
                         .gradientNormalizationThreshold(0.1).dropOut(0.9)
                         .weightInit(WeightInit.XAVIER).activation(Activation.RELU).build())
                 .layer(1, new DenseLayer.Builder().nIn(1000).nOut(1000).updater(ADAGRAD)

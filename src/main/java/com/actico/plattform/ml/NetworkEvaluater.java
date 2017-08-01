@@ -31,7 +31,7 @@ public class NetworkEvaluater {
 
         try( RecordReader rrTest = new ListStringRecordReader();) {
             rrTest.initialize(new ListStringSplit(dataEval));
-            testIter = new RecordReaderDataSetIterator(rrTest, batchSize, 38, 2);
+            testIter = new RecordReaderDataSetIterator(rrTest, batchSize, 29, 2);
         } catch (Exception e) {
             log.warn(e);
         }

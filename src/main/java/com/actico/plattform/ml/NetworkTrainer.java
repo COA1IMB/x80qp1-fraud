@@ -42,7 +42,7 @@ public class NetworkTrainer {
 
     void trainNetwork(List<List<String>> data, List<List<String>> data2, String neuralNetworkFilePath) {
 
-        int batchSize = Integer.parseInt(Utilities.getPropertieValue("batchSize"));
+        int batchSize = 1026;
         DataSetIterator trainIter = null;
         DataSetIterator regIter = null;
 
@@ -50,8 +50,8 @@ public class NetworkTrainer {
              RecordReader rr2 = new ListStringRecordReader()) {
             rr.initialize(new ListStringSplit(data));
             rr2.initialize(new ListStringSplit(data2));
-            trainIter = new RecordReaderDataSetIterator(rr, batchSize, 38, 2);
-            regIter = new RecordReaderDataSetIterator(rr2, batchSize, 38, 2);
+            trainIter = new RecordReaderDataSetIterator(rr, batchSize, 29, 2);
+            regIter = new RecordReaderDataSetIterator(rr2, batchSize, 29, 2);
         } catch (Exception e) {
             log.warn(e);
         }

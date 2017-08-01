@@ -16,17 +16,6 @@ public class FannieMaeStart {
 
         log.info("Start Execution");
 
-        //Merge performance files q1-q4 in a single file
-        //Utilities.mergeTextFiles();
-
-//        //extract features and labels to generate  learning & evaluation data and write them to a txt file
-//        DataBuilder learnDataBuilder = new DataBuilder();
-//        DataBuilder evalDataBuilder = new DataBuilder();
-//        log.info("Start Learn Data Extraction");
-//        learnDataBuilder.extractLearnData("aquisition2007", "performance2007", "filePathToStoreLearnData");
-//        log.info("Start Evaluation Data Extraction");
-//        evalDataBuilder.extractLearnData("aquisition2008Q1", "performance2008Q1", "filePathToStoreEvalData");
-
         DataPreprocessor prepper = new DataPreprocessor();
         NetworkEvaluater evaluater = new NetworkEvaluater();
         NetworkTrainerL2 trainerl2 = new NetworkTrainerL2();
@@ -37,7 +26,7 @@ public class FannieMaeStart {
         List<List<String>> evaluationData = prepper.getEvalDataAsList();
 
         //Start neural network training
-        String neuralNetworkFilePath = Utilities.getPropertieValue("neuralNetworkFilePath");
+        String neuralNetworkFilePath = "src\\NeuralNetwork.zip";
         //trainer.trainNetwork(learnData, regulationData, neuralNetworkFilePath);
         trainerl2.trainNetwork(learnData, regulationData, neuralNetworkFilePath);
 
