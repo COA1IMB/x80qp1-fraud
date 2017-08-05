@@ -41,10 +41,14 @@ import static org.deeplearning4j.nn.conf.Updater.NESTEROVS;
 public class NetworkTrainerL2 {
 
     private static Logger log = Logger.getLogger(NetworkTrainer.class.getName());
+    private static double currentBestPerformance = -1.0;
+    private static int epoche = 1;
+    private static int iter = 1;
+    private static String neuralNetworkFilePath = Utilities.getPropertieValue("neuralNetworkFilePath");;
 
     void trainNetwork(List<List<String>> data, List<List<String>> data2, String neuralNetworkFilePath) {
 
-        int batchSize = 1026;
+        int batchSize = 256;
         DataSetIterator trainIter = null;
         DataSetIterator regIter = null;
 
@@ -73,41 +77,17 @@ public class NetworkTrainerL2 {
         int iter = 1;
         int epoche = 1;
         int maxEpoche = 25;
-        double currentBestF1 = -1.0;
-
 
         while (maxEpoche >= epoche) {
+            int iterToCalcScore = getRandom();
             while (trainIter.hasNext()) {
+                if (iter % iterToCalcScore == 0) {
+                    trainerGetModelScore(model, regIter);
+                }
+                trainerGetModelScore(model, regIter);
                 model.fit(trainIter.next());
                 iter++;
             }
-            Evaluation eval = new Evaluation(2);
-            while (regIter.hasNext()) {
-                DataSet t = regIter.next();
-                INDArray features = t.getFeatureMatrix();
-                INDArray lables = t.getLabels();
-                INDArray predicted = model.output(features, false);
-                eval.eval(lables, predicted);
-            }
-            regIter.reset();
-            double f1 = eval.f1(1);
-            double recall = eval.recall(1, 0.0);
-            double precision = eval.precision(1, 0.0);
-            double accuracy = eval.accuracy();
-            if (currentBestF1 < f1) {
-                currentBestF1 = f1;
-                log.info("New Best Model at epoche: " + epoche + " F1-Score: " + f1 + " Recall: " + recall + " Precision: " + precision + " Accuracy: " + accuracy);
-                File locationToSave = new File(neuralNetworkFilePath);
-                org.deeplearning4j.nn.api.Model model2 = model;
-                try {
-                    ModelSerializer.writeModel(model2, locationToSave, false);
-                } catch (Exception e) {
-                    log.warn(e);
-                }
-            } else {
-                log.info("No Progress in epoche: " + epoche + " F1-Score: " + f1 + " Recall: " + recall + " Precision: " + precision + " Accuracy: " + accuracy);
-            }
-            eval = null;
             trainIter.reset();
             epoche++;
         }
@@ -139,31 +119,35 @@ public class NetworkTrainerL2 {
                 .pretrain(false).backprop(true).build();
     }
 
-    private MultiLayerConfiguration getNetworkConfigAuto() {
-        return new NeuralNetConfiguration.Builder()
-                .seed(1234)
-                .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
-                .gradientNormalizationThreshold(1.0)
-                .updater(NESTEROVS).momentum(0.5)
-                .momentumAfter(Collections.singletonMap(3, 0.9))
-                .optimizationAlgo(OptimizationAlgorithm.CONJUGATE_GRADIENT)
-                .list()
-                .layer(0, new AutoEncoder.Builder().nIn(38 * 63500).nOut(500)
-                        .weightInit(WeightInit.XAVIER).lossFunction(LossFunctions.LossFunction.RMSE_XENT)
-                        .corruptionLevel(0.3)
-                        .build())
-                .layer(1, new AutoEncoder.Builder().nIn(500).nOut(250)
-                        .weightInit(WeightInit.XAVIER).lossFunction(LossFunctions.LossFunction.RMSE_XENT)
-                        .corruptionLevel(0.3)
-
-                        .build())
-                .layer(2, new AutoEncoder.Builder().nIn(250).nOut(200)
-                        .weightInit(WeightInit.XAVIER).lossFunction(LossFunctions.LossFunction.RMSE_XENT)
-                        .corruptionLevel(0.3)
-                        .build())
-                .layer(3, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).activation("softmax")
-                        .nIn(200).nOut(2).build())
-                .pretrain(true).backprop(false)
-                .build();
+    private static void trainerGetModelScore(MultiLayerNetwork model, DataSetIterator regIter) {
+        Evaluation eval = new Evaluation(2);
+        while (regIter.hasNext()) {
+            DataSet t = regIter.next();
+            INDArray features = t.getFeatureMatrix();
+            INDArray lables = t.getLabels();
+            INDArray predicted = model.output(features, false);
+            eval.eval(lables, predicted);
+        }
+        regIter.reset();
+        double f1 = eval.f1(1);
+        double recall = eval.recall(1, 0.0);
+        double precision = eval.precision(1, 0.0);
+        double accuracy = eval.accuracy();
+        if (currentBestPerformance < accuracy) {
+            currentBestPerformance = accuracy;
+            log.info("New Best Model at: " + epoche + "/" + iter + " F1-Score: " + f1 + " Recall: " + recall + " Precision: " + precision + " Accuracy: " + accuracy);
+            File locationToSave = new File(neuralNetworkFilePath);
+            org.deeplearning4j.nn.api.Model model2 = model;
+            try {
+                ModelSerializer.writeModel(model2, locationToSave, false);
+            } catch (Exception e) {
+                log.warn(e);
+            }
+        } else {
+            log.info("No Progress at: " + epoche + "/" + iter + " F1-Score: " + f1 + " Recall: " + recall + " Precision: " + precision + " Accuracy: " + accuracy);
+        }
+    }
+    private int getRandom() {
+        return 25 + (int) (Math.random() * ((75 - 25) + 1));
     }
 }
